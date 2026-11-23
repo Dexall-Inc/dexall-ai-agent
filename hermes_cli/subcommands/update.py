@@ -9,7 +9,7 @@ def build_update_parser(subparsers, *, cmd_update: Callable) -> None:
     """Attach the ``update`` subcommand to ``subparsers``."""
     from hermes_cli.release_channels import validate_name
     update_parser = subparsers.add_parser(
-        "update", help="Hermes Agent を更新する",
+        "update", help="ALL AI5.2 TACT を更新する",
         description="Git から変更を取得し、依存関係を再インストールします。")
     update_parser.add_argument(
         "--gateway", action="store_true", default=False,

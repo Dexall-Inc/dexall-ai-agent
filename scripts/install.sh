@@ -201,7 +201,7 @@ stage_signal() {
 print_banner() {
     printf '\n%s%s' "$C_MAGENTA" "$C_BOLD"
     printf '%s\n' "┌─────────────────────────────────────────────────────────┐"
-    printf '%s\n' "│             ☤ Hermes Agent Installer                    │"
+    printf '%s\n' "│          ✦ ALL AI5.2 TACT Installer                     │"
     printf '%s\n' "├─────────────────────────────────────────────────────────┤"
     printf '%s\n' "│  An open source AI agent by Nous Research.              │"
     printf '%s\n' "└─────────────────────────────────────────────────────────┘"
@@ -523,7 +523,7 @@ products_record() {
 stage_record() {
     case "$1" in
         prerequisites) echo "System prerequisites|runtime|false" ;;
-        repository)    echo "Download Hermes Agent|runtime|false" ;;
+        repository)    echo "Download ALL AI5.2 TACT|runtime|false" ;;
         venv)          echo "Create Python environment|runtime|false" ;;
         python-deps)   echo "Install Python dependencies|runtime|false" ;;
         config)        echo "Prepare config and skills|configuration|false" ;;
@@ -999,7 +999,7 @@ stage_repository() {
             || log_warn "could not disable gc.writeCommitGraph in $INSTALL_DIR"
         git -C "$INSTALL_DIR" config fetch.writeCommitGraph false \
             || log_warn "could not disable fetch.writeCommitGraph in $INSTALL_DIR"
-        log_success "Hermes Agent cloned"
+        log_success "ALL AI5.2 TACT cloned"
     fi
     if [ -n "$INSTALL_COMMIT" ] && [ "$pinned" = false ]; then
         # A rerun over an existing checkout pins here (a fresh clone pinned
@@ -1213,7 +1213,7 @@ stage_complete() {
         "$INSTALL_DIR/.hermes/bin/hermes" update --set-channel "$CHANNEL" \
             || fail "could not save the $CHANNEL update channel" other
     fi
-    log_success "Hermes Agent install complete. Run: hermes"
+    log_success "ALL AI5.2 TACT install complete. Run: hermes"
 }
 
 print_path_reload_hint() {

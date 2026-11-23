@@ -9,7 +9,7 @@ def build_setup_parser(subparsers, *, cmd_setup: Callable) -> None:
     """Attach the ``setup`` subcommand to ``subparsers``."""
     setup_parser = subparsers.add_parser(
         "setup", help="対話式セットアップ",
-        description="ウィザードで Hermes Agent を設定します。項目を指定するには hermes setup model|tts|terminal|gateway|tools|telemetry|agent を実行します。")
+        description="ウィザードで ALL AI5.2 TACT を設定します。項目を指定するには hermes setup model|tts|terminal|gateway|tools|telemetry|agent を実行します。")
     setup_parser.add_argument(
         "section", nargs="?",
         choices=["model", "tts", "terminal", "gateway", "tools", "telemetry", "agent"],

@@ -9,7 +9,7 @@ def build_doctor_parser(subparsers, *, cmd_doctor: Callable) -> None:
     """Attach the ``doctor`` subcommand to ``subparsers``."""
     doctor_parser = subparsers.add_parser(
         "doctor", help="設定と依存関係を確認する",
-        description="Hermes Agent の設定や依存関係の問題を診断します。")
+        description="ALL AI5.2 TACT の設定や依存関係の問題を診断します。")
     doctor_parser.add_argument(
         "--fix", action="store_true", help="問題の自動修復を試みます。")
     doctor_parser.add_argument(

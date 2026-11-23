@@ -11,7 +11,7 @@ def build_config_parser(subparsers, *, cmd_config: Callable) -> None:
     """Attach the ``config`` subcommand to ``subparsers``."""
     config_parser = subparsers.add_parser(
         "config", help="設定を表示・編集する",
-        description="Hermes Agent の設定を管理します。")
+        description="ALL AI5.2 TACT の設定を管理します。")
     config_subparsers = config_parser.add_subparsers(dest="config_command")
 
     config_subparsers.add_parser("show", help="現在の設定を表示します。")

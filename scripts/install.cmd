@@ -12,7 +12,7 @@ REM   iex (irm https://raw.githubusercontent.com/Dexall-Inc/dexall-ai-agent/deve
 REM ============================================================================
 
 echo.
-echo  Hermes Agent Installer
+echo  ALL AI5.2 TACT Installer
 echo  Launching PowerShell installer...
 echo.
 
