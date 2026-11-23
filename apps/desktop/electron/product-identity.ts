@@ -37,13 +37,16 @@ export function applyDesktopIdentity(
 ): string | null {
   const stable = !identity.token && identity.appNamePascal === identity.artifactNamePascal
   const currentUserData = stable ? app.getPath('userData') : ''
+
   const userData = stable
     ? path.basename(currentUserData) === identity.displayName
       ? path.join(path.dirname(currentUserData), identity.windowsExecutableName)
       : currentUserData
     : path.join(app.getPath('appData'), identity.appNamePascal)
+
   mkdirSync(userData, { recursive: true })
   app.setPath('userData', userData)
+
   if (stable) {
     return null
   }
