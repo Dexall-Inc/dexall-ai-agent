@@ -18,7 +18,9 @@ import urllib.error
 import urllib.request
 
 from hermes_constants import get_hermes_home
-from hermes_cli.source_releases import OFFICIAL_REPOSITORY, _GITHUB_ORIGIN, resolve_source_target
+from hermes_cli.source_releases import (
+    DEXALL_BRANCH, DEXALL_REPOSITORY, OFFICIAL_REPOSITORY, _GITHUB_ORIGIN, resolve_source_target,
+)
 
 logger = logging.getLogger(__name__)
 UPDATE_AVAILABLE_NO_COUNT = -1
@@ -617,7 +619,10 @@ def check_for_updates(*, install_root: Path | None = None, home: Path | None = N
         source_target = _resolve_channel(result, channel, co, forward_only=forward_only)
         if source_target is not None and not source_target.commit:
             # The record supplies a default, not permission to leave the user's branch.
-            selected_branch = configured_branch or _checked_out_branch(co.current_branch, source_target.branch)
+            current_branch = co.current_branch
+            if source_target.repository.casefold() == DEXALL_REPOSITORY.casefold() and current_branch == "main":
+                current_branch = DEXALL_BRANCH
+            selected_branch = configured_branch or _checked_out_branch(current_branch, source_target.branch)
     if "error" not in result and (source_target is None or source_target.branch is not None):
         # Only a Desktop-configured branch the caller did not override is healed.
         heal = branch_config_path and not branch and configured_branch == selected_branch

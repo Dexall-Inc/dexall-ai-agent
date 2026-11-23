@@ -20,8 +20,18 @@ set -u
 # hygiene can't break the locked sync the way it used to before pm owned it.
 export UV_NO_CONFIG=1
 
-REPO_URL="${HERMES_REPO_URL:-https://github.com/NousResearch/hermes-agent.git}"
-BRANCH="main"
+REPO_URL="${HERMES_REPO_URL:-https://github.com/Dexall-Inc/dexall-ai-agent.git}"
+default_source_branch() {
+    local repo="${1%/}"
+    repo="${repo%.git}"
+    case "$repo" in
+        https://github.com/Dexall-Inc/dexall-ai-agent|git@github.com:Dexall-Inc/dexall-ai-agent|ssh://git@github.com/Dexall-Inc/dexall-ai-agent)
+            printf '%s\n' develop ;;
+        *) printf '%s\n' main ;;
+    esac
+}
+BRANCH="$(default_source_branch "$REPO_URL")"
+BRANCH_EXPLICIT=false
 INSTALL_COMMIT=""
 # The update channel to install: stable (the latest published release, the default for the
 # official repository's main line) or main (every commit). An explicit choice is persisted.
@@ -52,7 +62,7 @@ while [ $# -gt 0 ]; do
                 exit 2
             fi
             case "$option" in
-                --branch|-Branch) BRANCH="$2" ;;
+                --branch|-Branch) BRANCH="$2"; BRANCH_EXPLICIT=true ;;
                 --commit|-Commit) INSTALL_COMMIT="$2" ;;
                 --channel|-Channel) CHANNEL="$2" ;;
                 --dir) INSTALL_DIR="$2" ;;
@@ -749,6 +759,9 @@ stage_repository() {
         # just the first clone.
         if [ -n "${HERMES_REPO_URL:-}" ]; then
             git -C "$INSTALL_DIR" remote set-url origin "$REPO_URL" || fail "cannot point origin at $REPO_URL" git_fetch_failed
+        fi
+        if [ "$BRANCH_EXPLICIT" = false ]; then
+            BRANCH="$(default_source_branch "$(git -C "$INSTALL_DIR" config --get remote.origin.url)")"
         fi
         # No recorded choice: an official checkout tracks stable, as `hermes update` does.
         if [ -z "$channel" ]; then

@@ -76,7 +76,16 @@ $script:BoundParams = $PSBoundParameters
 # Under iex, script scope is the caller's session and outlives a run; start
 # each run without the previous run's answer (see Set-LauncherUserPath).
 $script:BinDirOnCallerPath = $null
-$RepoUrl = if ($env:HERMES_REPO_URL) { $env:HERMES_REPO_URL } else { "https://github.com/NousResearch/hermes-agent.git" }
+$RepoUrl = if ($env:HERMES_REPO_URL) { $env:HERMES_REPO_URL } else { "https://github.com/Dexall-Inc/dexall-ai-agent.git" }
+function Get-DefaultSourceBranch([string]$Url) {
+    if ($Url -match '^(https://github\.com/|git@github\.com:|ssh://git@github\.com/)Dexall-Inc/dexall-ai-agent(\.git)?/?$') {
+        return "develop"
+    }
+    return "main"
+}
+if (-not $script:BoundParams.ContainsKey("Branch")) {
+    $Branch = Get-DefaultSourceBranch $RepoUrl
+}
 
 # --- BEGIN GENERATED: bootstrap pins (scripts/gen-bootstrap-pins.py) ---
 # Derived from pm/lock.json. DO NOT EDIT BY HAND:
@@ -1108,11 +1117,13 @@ function Stage-Repository {
             Invoke-Native { git -C $InstallDir remote set-url origin $RepoUrl }
             if ($LASTEXITCODE) { Fail "cannot point origin at $RepoUrl" git_fetch_failed }
         }
+        # Read the configured URL so insteadOf rewrites do not change the branch policy.
+        $origin = "$(Invoke-Native { git -C $InstallDir config --get remote.origin.url 2>$null })".Trim()
+        if (-not $script:BoundParams.ContainsKey("Branch")) {
+            $Branch = Get-DefaultSourceBranch $origin
+        }
         # No recorded choice: an official checkout tracks stable, as `hermes update` does.
         if (-not $chosen) {
-            # The configured URL, as hermes_cli.update_channel reads it (`remote get-url`
-            # applies insteadOf rewrites).
-            $origin = "$(Invoke-Native { git -C $InstallDir config --get remote.origin.url 2>$null })".Trim()
             $release = Get-StableTarget $origin
         }
         if ($chosen -ceq 'main') { $chosen = '' }
