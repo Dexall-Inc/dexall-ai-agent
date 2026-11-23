@@ -68,13 +68,18 @@ def test_main_routes_systemexit_through_os_exit(monkeypatch):
     stderr.flush.assert_called_once_with()
 
 
-def test_exit_backstop_releases_pid_file_and_runtime_lock(monkeypatch):
+@pytest.mark.parametrize("owns_host", [True, False])
+def test_exit_backstop_releases_pid_file_and_runtime_lock(monkeypatch, owns_host):
     """os._exit bypasses atexit, and the early SystemExit exit paths never run
     _stop_impl — so the force-exit backstop itself must release the PID file and
     runtime lock, or those early paths (#51228 fatal-config) would leak them.
     Both releases are idempotent, so this is safe on every exit path."""
-    from gateway import status as gateway_status
+    from gateway import host_rendezvous, status as gateway_status
 
+    host_cleanup = Mock()
+    monkeypatch.setattr(host_rendezvous, "owns_host_lock", lambda role: owns_host)
+    monkeypatch.setattr(host_rendezvous, "clear_record", host_cleanup.clear)
+    monkeypatch.setattr(host_rendezvous, "release_host_lock", host_cleanup.release)
     remove_pid = Mock()
     release_lock = Mock()
     monkeypatch.setattr(gateway_status, "remove_pid_file", remove_pid)
@@ -89,3 +94,9 @@ def test_exit_backstop_releases_pid_file_and_runtime_lock(monkeypatch):
     assert exc_info.value.code == 78
     remove_pid.assert_called_once_with()
     release_lock.assert_called_once_with()
+    if owns_host:
+        assert [entry[0] for entry in host_cleanup.mock_calls] == ["clear", "release"]
+        host_cleanup.clear.assert_called_once_with(host_rendezvous.ROLE_GATEWAY)
+        host_cleanup.release.assert_called_once_with(host_rendezvous.ROLE_GATEWAY)
+    else:
+        assert not host_cleanup.mock_calls

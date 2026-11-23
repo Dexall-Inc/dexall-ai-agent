@@ -1,4 +1,4 @@
-# Hermes Agent - 開発ガイド
+# TACT 開発ガイド
 
 このルートファイルはハブです。どこにでも適用される内容と、その後のルーティングテーブルで構成されています。各エリアの `AGENTS.md` は、そのディレクトリで作業するときに自動的に読み込まれるため、そこで編集する前に読んでください。
 `python scripts/check` はこのファイルを 12k 文字、ルートから各エリアへの連鎖を 30k 文字に制限します。長文は `website/docs/developer-guide/` に置いてください。
@@ -7,9 +7,9 @@
 
 **正しい解決策を決して諦めない。**
 
-## Hermes とは
+## TACT とは
 
-Hermes は、1 つのエージェントコアを CLI、TUI、Electron デスクトップアプリ、Web ダッシュボード、ACP エディタ、メッセージングゲートウェイ（25 以上のプラットフォームプラグイン）で動かすパーソナル AI エージェントです。コアを肥大化させるのではなく、**プラグインとスキル**によって拡張されます。
+TACT は、1 つのエージェントコアを CLI、TUI、Electron デスクトップアプリ、Web ダッシュボード、ACP エディタ、メッセージングゲートウェイ（25 以上のプラットフォームプラグイン）で動かすパーソナル AI エージェントです。コアを肥大化させるのではなく、**プラグインとスキル**によって拡張されます。
 
 ほぼすべての設計判断を形作り、あらゆる変更をレビューする際の視点となる 2 つの不変条件があります。
 
@@ -45,7 +45,7 @@ hermes-agent/
 ├── run_agent.py          # AIAgent ファサード。ターンループは agent/turn_*.py にある
 ├── model_tools.py        # ツールオーケストレーション、handle_function_call()。発見は tools/registry.py
 ├── toolsets.py           # TOOLSETS 辞書、_HERMES_CORE_TOOLS
-├── cli.py                # HermesCLI（REPL、スラッシュディスパッチ）+ hermes_cli/cli_*_mixin.py
+├── cli.py                # CLI（REPL、スラッシュディスパッチ）+ hermes_cli/cli_*_mixin.py
 ├── persistence/          # ストレージインターフェースとその sqlite/ バックエンド
 ├── hermes_constants.py   # get_hermes_home()、display_hermes_home() — プロファイル対応パス
 ├── scripts/              # check、run_tests.sh、code_health/、ci/
@@ -72,7 +72,7 @@ hermes-agent/
 - **`~/.hermes` をハードコードしない:** パスには `get_hermes_home()`、テキストには `display_hermes_home()`（HX001）。`_get_profiles_root()` は意図的に HOME にアンカーされています。
 - **1 つのプロセスが多くのプロファイルにサービスを提供します。** ターンの外で実行されるコード（起動プローブ、エビクション、ティッカー、遅延コールバック、RPC メソッド、スレッドホップ、子プロセス生成）は、所有プロファイルのスコープを明示的にバインドします。`os.environ`、モジュールグローバル、インポート時の値は起動プロファイルのものを保持するため、バインドされていない読み取りはサイレントなデフォルトプロファイルのリークです。バインドポイントと継ぎ目: `gateway/AGENTS.md` § プロファイルスコープ（HX002/HX004/HX005/HX012、PS-P05/P06）。
 - **マシン事実と実行可能ファイルの検索は `hermes_platform` を通ります。**
-- **依存関係は上限を持ちます**（`>=floor,<next_major`。git URL と Actions は SHA に固定）。`pyproject.toml` を編集した後は `hermes pm lock` を実行して `uv.lock` をコミットします。生の pip/uv で Hermes 環境を決して変更しない。
+- **依存関係は上限を持ちます**（`>=floor,<next_major`。git URL と Actions は SHA に固定）。`pyproject.toml` を編集した後は `hermes pm lock` を実行して `uv.lock` をコミットします。生の pip/uv で TACT 環境を決して変更しない。
 - **TypeScript（デスクトップ、TUI）:** スレッド化された状態よりも機能所有のナノストア、薄いルートルート、狭いフックと同一場所のアクションモジュール、props と共有形状には `interface`、条件ラダーよりもテーブル駆動のディスパッチ。デスクトップはルートを `src/app`、アトムを `src/store`、純粋なヘルパーを `src/lib` に保持します。
 - **コア/プラグインの交差を追加しない:** コアは特定のバンドル済みプラグインを決してインポートせず、プラグインは公開されたプラグイン API（`hermes_cli/data/plugin_api.json`、`ctx`）のみを使います。既存の交差はベースライン化されています。`scripts/boundary_lint.py` は新しいものに対してテストスイート（`scripts/check` ではなく）を失敗させます。
 - **新しい設定キーまたはスラッシュコマンドはドキュメントと一緒に出荷されます**（`tests/ci/test_docs_drift.py`）。

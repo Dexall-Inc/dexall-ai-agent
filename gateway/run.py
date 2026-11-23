@@ -5095,6 +5095,16 @@ def _exit_after_graceful_shutdown(exit_code: int) -> None:
         remove_pid_file()
         release_gateway_runtime_lock()
 
+    def _release_host_ownership() -> None:
+        # Hard exits skip the host owner's atexit hooks. Release ownership
+        # explicitly even when the OS does not finish tearing down the process.
+        from gateway import host_rendezvous as hr
+        if hr.owns_host_lock(hr.ROLE_GATEWAY):
+            try:
+                hr.clear_record(hr.ROLE_GATEWAY)
+            finally:
+                hr.release_host_lock(hr.ROLE_GATEWAY)
+
     def _mark_exited() -> None:
         # Single funnel every graceful exit passes through, so the next boot's unclean-death detector
         # fires only for genuine SIGKILL/OOM/VM deaths. Ownership-guarded against an old --replace life.
@@ -5117,7 +5127,7 @@ def _exit_after_graceful_shutdown(exit_code: int) -> None:
         from hermes_logging import drain_log_queue
         drain_log_queue(timeout=1.0)
 
-    for _step in (_release_locks, _mark_exited, _flush_metrics, _write_cpu_profile, _drain_logs):
+    for _step in (_release_locks, _release_host_ownership, _mark_exited, _flush_metrics, _write_cpu_profile, _drain_logs):
         _best_effort(_step)
     os._exit(exit_code)
 
